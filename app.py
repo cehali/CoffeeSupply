@@ -1,0 +1,96 @@
+from flask import Flask, render_template, redirect, url_for, session
+from flask_bootstrap import Bootstrap
+from flask_wtf import FlaskForm
+from wtforms import StringField, PasswordField, BooleanField
+from wtforms.validators import InputRequired, Email, Length
+from werkzeug.security import generate_password_hash, check_password_hash
+from google.cloud import firestore
+
+
+app = Flask(__name__)
+app.config['SECRET_KEY'] = 'mojbardzosekretnyklucz'
+Bootstrap(app)
+db = firestore.Client()
+database = db.collection('users')
+
+
+class LoginForm(FlaskForm):
+    username = StringField('username', validators=[InputRequired(), Length(min=4, max=15)])
+    password = PasswordField('password', validators=[InputRequired(), Length(min=8, max=80)])
+
+
+class RegisterForm(FlaskForm):
+    username = StringField('username', validators=[InputRequired(), Length(min=4, max=15)])
+    email = StringField('email', validators=[InputRequired(), Email(message='Invalid email'), Length(max=50)])
+    password = PasswordField('password', validators=[InputRequired(), Length(min=8, max=80)])
+
+
+@app.route('/')
+def index():
+    return render_template('index.html')
+
+
+@app.route('/signup', methods=['GET', 'POST'])
+def signup():
+    form = RegisterForm()
+
+    if not session.get('logged_in'):
+        if form.validate_on_submit():
+            hashed_password = generate_password_hash(form.password.data, method='sha256')
+            user = {'username': form.username.data, 'email': form.email.data, 'password': hashed_password}
+            database.add(user)
+            return redirect(url_for('login'))
+    else:
+        return redirect(url_for('dashboard'))
+
+    return render_template('signup.html', form=form)
+
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    form = LoginForm()
+
+    if not session.get('logged_in'):
+        if form.validate_on_submit():
+            users = database.where('username', '==', form.username.data).get()
+            for user in users:
+                if check_password_hash(user.to_dict().get('password'), form.password.data):
+                    session['logged_in'] = True
+                    session['username'] = form.username.data
+                    session['user_id'] = user.id
+                    return redirect(url_for('dashboard'))
+    else:
+        return redirect(url_for('dashboard'))
+
+    return render_template('login.html', form=form)
+
+
+@app.route('/dashboard')
+def dashboard():
+    if not session.get('logged_in'):
+        return redirect(url_for('login'))
+    return render_template('dashboard.html', user_id=session['user_id'], name=session['username'])
+
+
+@app.route('/providers')
+def providers():
+    if not session.get('logged_in'):
+        return redirect(url_for('login'))
+    return render_template('providers.html')
+
+
+@app.route('/offers')
+def offers():
+    if not session.get('logged_in'):
+        return redirect(url_for('login'))
+    return render_template('offers.html')
+
+
+@app.route('/logout')
+def logout():
+    session['logged_in'] = False
+    return redirect(url_for('index'))
+
+
+if __name__ == '__main__':
+    app.run(debug=True)
