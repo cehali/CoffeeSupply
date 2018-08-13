@@ -11,7 +11,8 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = 'mojbardzosekretnyklucz'
 Bootstrap(app)
 db = firestore.Client()
-database = db.collection('users')
+users_database = db.collection('users')
+providers_database = db.collection('providers')
 
 
 class LoginForm(FlaskForm):
@@ -38,7 +39,7 @@ def signup():
         if form.validate_on_submit():
             hashed_password = generate_password_hash(form.password.data, method='sha256')
             user = {'username': form.username.data, 'email': form.email.data, 'password': hashed_password}
-            database.add(user)
+            users_database.add(user)
             return redirect(url_for('login'))
     else:
         return redirect(url_for('dashboard'))
@@ -52,7 +53,7 @@ def login():
 
     if not session.get('logged_in'):
         if form.validate_on_submit():
-            users = database.where('username', '==', form.username.data).get()
+            users = users_database.where('username', '==', form.username.data).get()
             for user in users:
                 if check_password_hash(user.to_dict().get('password'), form.password.data):
                     session['logged_in'] = True
@@ -76,7 +77,13 @@ def dashboard():
 def providers():
     if not session.get('logged_in'):
         return redirect(url_for('login'))
-    return render_template('providers.html')
+
+    providers_ref = providers_database.get()
+    providers = []
+    for provider in providers_ref:
+        providers.append(provider.to_dict().get('name'))
+
+    return render_template('providers.html', providers=providers)
 
 
 @app.route('/offers')

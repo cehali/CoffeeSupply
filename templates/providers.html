@@ -30,8 +30,13 @@
 
 {% block content %}
     <div class="container">
-        <div>
-
+       <div>
+            <h2>Coffee providers</h2>
+            <ul class="list-group">
+            {% for provider in providers %}
+                <li class="list-group-item">{{ provider }}</li>
+            {% endfor %}
+            </ul>
         </div>
     </div>
 {% endblock %}
