@@ -1,7 +1,7 @@
-from flask import Flask, render_template, redirect, url_for, session
+from flask import Flask, render_template, redirect, url_for, session, request
 from flask_bootstrap import Bootstrap
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, BooleanField
+from wtforms import StringField, PasswordField, SelectField
 from wtforms.validators import InputRequired, Email, Length
 from werkzeug.security import generate_password_hash, check_password_hash
 from google.cloud import firestore
@@ -16,14 +16,18 @@ providers_database = db.collection('providers')
 
 
 class LoginForm(FlaskForm):
-    username = StringField('username', validators=[InputRequired(), Length(min=4, max=15)])
-    password = PasswordField('password', validators=[InputRequired(), Length(min=8, max=80)])
+    username = StringField('Username', validators=[InputRequired(), Length(min=4, max=15)])
+    password = PasswordField('Password', validators=[InputRequired(), Length(min=8, max=80)])
 
 
 class RegisterForm(FlaskForm):
-    username = StringField('username', validators=[InputRequired(), Length(min=4, max=15)])
-    email = StringField('email', validators=[InputRequired(), Email(message='Invalid email'), Length(max=50)])
-    password = PasswordField('password', validators=[InputRequired(), Length(min=8, max=80)])
+    username = StringField('Username', validators=[InputRequired(), Length(min=4, max=15)])
+    email = StringField('Email', validators=[InputRequired(), Email(message='Invalid email'), Length(max=50)])
+    password = PasswordField('Password', validators=[InputRequired(), Length(min=8, max=80)])
+
+
+class AddProviderForm(FlaskForm):
+    providerName = SelectField('Select provider', validators=[InputRequired()])
 
 
 @app.route('/')
@@ -38,7 +42,7 @@ def signup():
     if not session.get('logged_in'):
         if form.validate_on_submit():
             hashed_password = generate_password_hash(form.password.data, method='sha256')
-            user = {'username': form.username.data, 'email': form.email.data, 'password': hashed_password}
+            user = {'username': form.username.data, 'email': form.email.data, 'password': hashed_password, 'providers': []}
             users_database.add(user)
             return redirect(url_for('login'))
     else:
@@ -73,17 +77,35 @@ def dashboard():
     return render_template('dashboard.html', user_id=session['user_id'], name=session['username'])
 
 
-@app.route('/providers')
+@app.route('/providers', methods=['GET', 'POST'])
 def providers():
+    form = AddProviderForm()
+
     if not session.get('logged_in'):
         return redirect(url_for('login'))
+
+    if request.method == 'POST':
+        users_providers = users_database.document(session['user_id']).get().to_dict().get('providers')
+        if isinstance(users_providers, list):
+            if form.providerName.data not in users_providers:
+                users_providers.append(form.providerName.data)
+                users_database.document(session['user_id']).update({'providers': users_providers})
+        else:
+            if users_providers != form.providerName.data:
+                users_providers = [users_providers]
+                users_providers.append(form.providerName.data)
+                users_database.document(session['user_id']).update({'providers': users_providers})
 
     providers_ref = providers_database.get()
     providers = []
     for provider in providers_ref:
         providers.append(provider.to_dict().get('name'))
 
-    return render_template('providers.html', providers=providers)
+    form.providerName.choices = [(g, g) for g in providers]
+
+    users_providers = users_database.document(session['user_id']).get().to_dict().get('providers')
+
+    return render_template('providers.html', form=form, users_providers=users_providers)
 
 
 @app.route('/offers')

@@ -1,4 +1,5 @@
 {% extends "bootstrap/base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
 
 {% block title %}
     Coffee supply
@@ -30,13 +31,41 @@
 
 {% block content %}
     <div class="container">
-       <div>
+        <div>
             <h2>Coffee providers</h2>
             <ul class="list-group">
-            {% for provider in providers %}
-                <li class="list-group-item">{{ provider }}</li>
-            {% endfor %}
+                {% for users_provider in users_providers %}
+                    <li class="list-group-item">{{ users_provider }}</li>
+                {% endfor %}
             </ul>
+        </div>
+        <button class="btn btn-lg btn-primary" data-toggle="modal" data-target="#addProvider">Add provider</button>
+    </div>
+
+    <div class="modal" id="addProvider">
+        <div class="modal-dialog">
+            <div class="modal-content">
+
+                <div class="modal-header">
+                    <h4 class="modal-title">Modal Header</h4>
+                </div>
+
+                <form class="form-addProvider" method="POST" action="/providers">
+
+                    <div class="modal-body">
+                        <div class="form-group">
+                            {{ form.hidden_tag() }}
+                            {{ wtf.form_field(form.providerName) }}
+                        </div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary">Add</button>
+                        <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+                    </div>
+                </form>
+
+            </div>
         </div>
     </div>
 {% endblock %}
