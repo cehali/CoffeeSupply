@@ -30,5 +30,29 @@
 
 {% block content %}
     <div class="container">
+        <h2>Coffee providers with offers</h2>
+        <p>Type something in the input field to search the table for first names, last names or emails:</p>
+
+        <input class="form-control" id="myInput" type="text" placeholder="Search..">
+
+        <table class="table">
+            <thead>
+            <tr>
+                <th>Provider name</th>
+                <th>Number of coffee brands</th>
+                <th>Frequency of delivery (for month)</th>
+            </tr>
+            </thead>
+            <tbody id="myTable">
+            {% for users_provider in users_providers %}
+                <tr>
+                    <td>{{ users_provider.name }}</td>
+                    <td>{{ users_provider.numberBrands }}</td>
+                    <td>{{ users_provider.frequency }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
     </div>
+
 {% endblock %}

@@ -31,41 +31,37 @@
 
 {% block content %}
     <div class="container">
-        <div>
-            <h2>Coffee providers</h2>
-            <ul class="list-group">
-                {% for users_provider in users_providers %}
-                    <li class="list-group-item">{{ users_provider }}</li>
-                {% endfor %}
-            </ul>
-        </div>
-        <button class="btn btn-lg btn-primary" data-toggle="modal" data-target="#addProvider">Add provider</button>
+        <h2>Coffee providers</h2>
+        <ul class="list-group">
+            {% for users_provider in users_providers %}
+                <li class="list-group-item">{{ users_provider.name }}</li>
+            {% endfor %}
+        </ul>
+
+    <button class="btn btn-lg btn-primary" data-toggle="modal" data-target="#addProvider">Add provider</button>
     </div>
 
-    <div class="modal" id="addProvider">
-        <div class="modal-dialog">
-            <div class="modal-content">
-
-                <div class="modal-header">
-                    <h4 class="modal-title">Modal Header</h4>
-                </div>
-
-                <form class="form-addProvider" method="POST" action="/providers">
-
-                    <div class="modal-body">
-                        <div class="form-group">
+    <form class="form-addProvider" method="POST" action="/providers">
+        <div class="modal" id="addProvider">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title">Add provider</h4>
+                    </div>
+                        <div class="modal-body">
                             {{ form.hidden_tag() }}
                             {{ wtf.form_field(form.providerName) }}
+                            {{ wtf.form_field(form.nrCoffeeBrands) }}
+                            {{ wtf.form_field(form.frequency) }}
                         </div>
-                    </div>
+                        <div class="modal-footer">
+                            <button type="submit" class="btn btn-primary">Add</button>
+                            <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+                        </div>
 
-                    <div class="modal-footer">
-                        <button type="submit" class="btn btn-primary">Add</button>
-                        <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
-                    </div>
-                </form>
-
+                </div>
             </div>
         </div>
-    </div>
+    </form>
+
 {% endblock %}
