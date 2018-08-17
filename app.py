@@ -5,6 +5,9 @@ from wtforms import StringField, PasswordField, SelectField, SubmitField, Hidden
 from wtforms.validators import InputRequired, Email, Length, ValidationError
 from werkzeug.security import generate_password_hash, check_password_hash
 from google.cloud import firestore
+import os
+
+os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "CoffeeSupply-77d375b45d86.json"
 
 
 app = Flask(__name__)
