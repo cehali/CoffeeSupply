@@ -1,0 +1,25 @@
+{% extends "bootstrap/base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block title %}
+    Edit provider
+{% endblock %}
+
+{% block styles %}
+    {{super()}}
+    <link rel="stylesheet" href="{{url_for('.static', filename='sign.css')}}">
+{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <form class="form-signin" method="POST" action={{ request.url }}>
+            <h2>Edit provider</h2>
+                {{ form.hidden_tag() }}
+                {{ wtf.form_field(form.editProviderName) }}
+                {{ wtf.form_field(form.editNrCoffeeBrands) }}
+                {{ wtf.form_field(form.editFrequency) }}
+                {{ wtf.form_field(form.edit, class='btn btn-primary') }}
+                {{ wtf.form_field(form.delete, class='btn btn-danger') }}
+        </form>
+    </div>
+{% endblock %}

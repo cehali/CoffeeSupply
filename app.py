@@ -1,7 +1,7 @@
-from flask import Flask, render_template, redirect, url_for, session
+from flask import Flask, render_template, redirect, url_for, session, request
 from flask_bootstrap import Bootstrap
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SelectField
+from wtforms import StringField, PasswordField, SelectField, SubmitField, HiddenField
 from wtforms.validators import InputRequired, Email, Length, ValidationError
 from werkzeug.security import generate_password_hash, check_password_hash
 from google.cloud import firestore
@@ -9,6 +9,8 @@ from google.cloud import firestore
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'mojbardzosekretnyklucz'
+app.jinja_env.trim_blocks = True
+app.jinja_env.lstrip_blocks = True
 Bootstrap(app)
 db = firestore.Client()
 users_database = db.collection('users')
@@ -26,14 +28,22 @@ class RegisterForm(FlaskForm):
     retypePassword = PasswordField('Retype password', validators=[InputRequired(), Length(min=8, max=80)])
 
 
-
 class AddProviderForm(FlaskForm):
-    # providerName = SelectField('Select provider', validators=[InputRequired()])
     providerName = StringField('Provider name', validators=[InputRequired()])
     nrCoffeeBrands = SelectField('Number of coffee brands', coerce=int, validators=[InputRequired()],
                                  choices=[(x, x) for x in range(1, 100)])
     frequency = SelectField('Frequency of delivery (for month)', coerce=int, validators=[InputRequired()],
                             choices=[(x, x) for x in range(1, 31)])
+
+
+class EditProviderForm(FlaskForm):
+    editProviderName = StringField('Provider name', validators=[InputRequired()])
+    editNrCoffeeBrands = SelectField('Number of coffee brands', coerce=int, validators=[InputRequired()],
+                                 choices=[(x, x) for x in range(1, 100)])
+    editFrequency = SelectField('Frequency of delivery (for month)', coerce=int, validators=[InputRequired()],
+                            choices=[(x, x) for x in range(1, 31)])
+    edit = SubmitField('Edit')
+    delete = SubmitField('Delete')
 
 
 @app.route('/')
@@ -102,15 +112,50 @@ def providers():
         provider = {'name': form.providerName.data, 'numberBrands': form.nrCoffeeBrands.data,
                     'frequency': form.frequency.data}
         if provider not in users_providers:
-            users_providers.append(provider)
-            users_database.document(session['user_id']).update({'providers': users_providers})
-
-            return redirect(url_for('providers'))
+            if not [item for item in users_providers if item.get('name') == provider.get('name')]:
+                users_providers.append(provider)
+                users_database.document(session['user_id']).update({'providers': users_providers})
+                return redirect(url_for('providers'))
 
     users_providers = users_database.document(session['user_id']).get().to_dict().get('providers')
 
     return render_template('providers.html', form=form, users_providers=users_providers)
 
+
+@app.route('/editProvider', methods=['GET', 'POST'])
+def edit_provider():
+    form = EditProviderForm()
+
+    users_providers = users_database.document(session['user_id']).get().to_dict().get('providers')
+    provider = [item for item in users_providers if item.get('name') == request.query_string.decode("utf-8")]
+
+    if provider:
+        if request.method == 'POST':
+            if form.validate_on_submit():
+                if form.edit.data:
+                    provider_new = {'name': form.editProviderName.data, 'numberBrands': form.editNrCoffeeBrands.data,
+                            'frequency': form.editFrequency.data}
+                    users_providers_new = []
+                    for dicts in users_providers:
+                        if dicts == provider[0]:
+                            dicts.update(provider_new)
+                        users_providers_new.append(dicts)
+
+                    users_database.document(session['user_id']).update({'providers': users_providers_new})
+                    return redirect(url_for('providers'))
+
+                if form.delete.data:
+                    users_providers_new = []
+                    users_providers_new[:] = [d for d in users_providers if d.get('name') != provider[0].get('name')]
+                    users_database.document(session['user_id']).update({'providers': users_providers_new})
+                    return redirect(url_for('providers'))
+
+        else:
+            form.editProviderName.data = provider[0].get('name')
+            form.editNrCoffeeBrands.data = provider[0].get('numberBrands')
+            form.editFrequency.data = provider[0].get('frequency')
+
+    return render_template('edit.html', form=form, provider=provider)
 
 
 @app.route('/offers')
