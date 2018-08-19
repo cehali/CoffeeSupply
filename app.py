@@ -44,7 +44,7 @@ class EditProviderForm(FlaskForm):
     editNrCoffeeBrands = SelectField('Number of coffee brands', coerce=int, validators=[InputRequired()],
                                  choices=[(x, x) for x in range(1, 100)])
     editFrequency = SelectField('Frequency of delivery (for month)', coerce=int, validators=[InputRequired()],
-                            choices=[(x, x) for x in range(1, 31)])
+                            choices=[(x, x) for x in range(1, 32)])
     edit = SubmitField('Edit')
     delete = SubmitField('Delete')
 
