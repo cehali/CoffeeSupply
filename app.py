@@ -90,8 +90,7 @@ def login():
     else:
         return redirect(url_for('dashboard'))
 
-    if not form.username.errors & form.password.errors:
-        return render_template('login.html', form=form)
+    return render_template('login.html', form=form)
 
 
 @app.route('/dashboard')
