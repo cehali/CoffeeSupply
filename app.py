@@ -89,8 +89,8 @@ def login():
             form.password.errors.append('Invalid username or password')
     else:
         return redirect(url_for('dashboard'))
-    
-    if not form.errors:
+
+    if not form.username.errors & form.password.errors:
         return render_template('login.html', form=form)
 
 
