@@ -20,16 +20,17 @@ users_database = db.collection('users')
 
 
 class LoginForm(FlaskForm):
-    username = StringField('Username', validators=[InputRequired(), Length(min=4, max=15)])
-    password = PasswordField('Password', validators=[InputRequired(), Length(min=8, max=80)])
+    username = StringField('Username', validators=[InputRequired(), Length(min=1, max=15)])
+    password = PasswordField('Password', validators=[InputRequired(), Length(min=1, max=80)])
     login = SubmitField('Login')
 
 
 class RegisterForm(FlaskForm):
-    username = StringField('Username', validators=[InputRequired(), Length(min=4, max=15)])
+    username = StringField('Username', validators=[InputRequired(), Length(min=1, max=15)])
     email = StringField('Email', validators=[InputRequired(), Email(message='Invalid email'), Length(max=50)])
-    password = PasswordField('Password', validators=[InputRequired(), Length(min=8, max=80)])
-    retypePassword = PasswordField('Retype password', validators=[InputRequired(), Length(min=8, max=80)])
+    password = PasswordField('Password', validators=[InputRequired(), Length(min=1, max=80)])
+    retypePassword = PasswordField('Retype password', validators=[InputRequired(), Length(min=1, max=80)])
+    signup = SubmitField('Sign Up')
 
 
 class AddProviderForm(FlaskForm):

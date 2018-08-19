@@ -19,7 +19,7 @@
             {{ wtf.form_field(form.email) }}
             {{ wtf.form_field(form.password) }}
             {{ wtf.form_field(form.retypePassword) }}
-            <button class="btn btn-primary" type="submit">Sign Up</button>
+            {{ wtf.form_field(form.signup, class='btn btn-primary') }}
         </form>
     </div>
 {% endblock %}
