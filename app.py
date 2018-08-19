@@ -116,6 +116,8 @@ def providers():
                 users_providers.append(provider)
                 users_database.document(session['user_id']).update({'providers': users_providers})
                 return redirect(url_for('providers'))
+            else:
+                form.providerName.errors.append('Provider with this name already exist')
 
     users_providers = users_database.document(session['user_id']).get().to_dict().get('providers')
 
