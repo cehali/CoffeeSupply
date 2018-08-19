@@ -58,19 +58,16 @@ def index():
 def signup():
     form = RegisterForm()
 
-    if not session.get('logged_in'):
-        if form.validate_on_submit():
-            if form.password.data != form.retypePassword.data:
-                form.password.errors.append('Passwords does not match')
-                form.retypePassword.errors.append('Passwords does not match')
-            else:
-                hashed_password = generate_password_hash(form.password.data, method='sha256')
-                user = {'username': form.username.data, 'email': form.email.data, 'password': hashed_password,
-                        'providers': []}
-                users_database.add(user)
-                return redirect(url_for('login'))
-    else:
-        return redirect(url_for('dashboard'))
+    if form.validate_on_submit():
+        if form.password.data != form.retypePassword.data:
+            form.password.errors.append('Passwords does not match')
+            form.retypePassword.errors.append('Passwords does not match')
+        else:
+            hashed_password = generate_password_hash(form.password.data, method='sha256')
+            user = {'username': form.username.data, 'email': form.email.data, 'password': hashed_password,
+                    'providers': []}
+            users_database.add(user)
+            return redirect(url_for('login'))
 
     return render_template('signup.html', form=form)
 
@@ -174,6 +171,11 @@ def offers():
 @app.route('/logout')
 def logout():
     session['logged_in'] = False
+    return redirect(url_for('index'))
+
+
+@app.errorhandler(404)
+def page_not_found(e):
     return redirect(url_for('index'))
 
 
