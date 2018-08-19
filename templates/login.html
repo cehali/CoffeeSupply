@@ -17,7 +17,7 @@
             {{ form.hidden_tag() }}
             {{ wtf.form_field(form.username) }}
             {{ wtf.form_field(form.password) }}
-            <button class="btn btn-primary" type="submit">Login</button>
+            {{ wtf.form_field(form.login, class='btn btn-primary') }}
         </form>
 
     </div>
