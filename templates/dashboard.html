@@ -7,6 +7,7 @@
 {% block styles %}
     {{super()}}
     <link rel="stylesheet" href="{{url_for('.static', filename='all.css')}}">
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
 {% endblock %}
 
 {% block navbar %}
@@ -17,7 +18,7 @@
                 <li class="nav-item"><a class="nav-link" href="/offers">Offers</a></li>
             </ul>
             <ul class="navbar-nav ml-auto">
-                <li><a class="nav-item" href="/logout"><span class="fa fa-sign-out"></span> Logout</a></li>
+                <li class="nav-item"><a class="nav-link" href="/logout"><span class="fa fa-sign-out"></span> Logout</></li>
             </ul>
     </nav>
 {% endblock %}
