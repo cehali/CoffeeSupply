@@ -1,8 +1,8 @@
 from flask import Flask, render_template, redirect, url_for, session, request
 from flask_bootstrap import Bootstrap
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SelectField, SubmitField, HiddenField
-from wtforms.validators import InputRequired, Email, Length, ValidationError
+from wtforms import StringField, PasswordField, SelectField, SubmitField
+from wtforms.validators import InputRequired, Email, Length
 from werkzeug.security import generate_password_hash, check_password_hash
 from google.cloud import firestore
 import os
@@ -89,8 +89,9 @@ def login():
             form.password.errors.append('Invalid username or password')
     else:
         return redirect(url_for('dashboard'))
-
-    return render_template('login.html', form=form)
+    
+    if not form.errors:
+        return render_template('login.html', form=form)
 
 
 @app.route('/dashboard')
